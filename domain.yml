@@ -1,33 +1,116 @@
 version: "3.1"
 
 intents:
-  - greet
+  - book_appointment
+  - cancel_appointment
   - goodbye
-  - affirm
-  - deny
-  - mood_great
-  - mood_unhappy
-  - bot_challenge
+  - ask_available_dates
+  - select_date
+  - confirm_appointment
+  - greet
+
+slots:
+  user_name:
+    type: text
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: appointment_form
+            requested_slot: user_name
+  user_email:
+    type: text
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: appointment_form
+            requested_slot: user_email
+  appointment_date:
+    type: text
+    mappings:
+      - type: from_text
+        conditions:
+          - active_loop: appointment_form
+            requested_slot: appointment_date
+
+forms:
+  appointment_form:
+    required_slots:
+      - user_name
+      - user_email
+      - appointment_date
+
+actions:
+  - action_book_appointment
+  - action_cancel_appointment
+  - action_get_available_dates
+  - validate_appointment_form
 
 responses:
   utter_greet:
-  - text: "Hey! How are you?"
+    - text: "Hello! How can I assist you today? 😊"
+    - text: "Hi there! Would you like to book an appointment?"
+    - text: "Hallo! Hoe kan ik u helpen vandaag? 😊"
+    - text: "Hoi! Wil je een afspraak maken?"
 
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
+  utter_ask_user_name:
+    - text: "Sure! Can you provide your full name?"
+  
+  utter_ask_user_email:
+    - text: "Please also provide your email"
+  
+  utter_ask_appointment_date:
+    - text: "Please provide an appointment date"
 
-  utter_did_that_help:
-  - text: "Did that help you?"
+  utter_ask_appointment:
+    - text: "Sure! Can you provide your full name and email?"
+    - text: "Of course! What's your name and email address?"
+    - text: "Natuurlijk! Wat is uw naam en e-mailadres?"
+    - text: "Ik help u graag. Wat is uw naam en e-mail?"
 
-  utter_happy:
-  - text: "Great, carry on!"
+  utter_show_available_dates:
+    - text: |
+        Here are the available slots:
+        📅 Monday, 10:00 AM  
+        📅 Wednesday, 2:00 PM  
+        📅 Friday, 4:30 PM  
+        Which one works for you? 😊
+    - text: |
+        Hier zijn de beschikbare tijden:
+        📅 Maandag, 10:00 uur  
+        📅 Woensdag, 14:00 uur  
+        📅 Vrijdag, 16:30 uur  
+        Welke tijd past het beste?
+    - text: |
+        Here are our next available appointments:
+        ✅ Monday at 9:30 AM
+        ✅ Thursday at 1:00 PM
+        ✅ Saturday at 11:00 AM
+        Let me know which one you prefer!
+    - text: |
+        Onze beschikbare tijden:
+        ✅ Maandag om 9:30 uur
+        ✅ Donderdag om 13:00 uur
+        ✅ Zaterdag om 11:00 uur
+        Laat me weten welke u wilt!
+
+  utter_confirm_appointment:
+    - text: "Great! Your appointment is booked for {date}. 🎉"
+    - text: "Your appointment on {date} is confirmed! See you then!"
+    - text: "Uw afspraak is bevestigd voor {date}. 🎉"
+    - text: "Afspraak vastgelegd voor {date}. Tot dan!"
+
+  utter_cancel_appointment:
+    - text: "Your appointment has been canceled. Let me know if you want to reschedule!"
+    - text: "Uw afspraak is geannuleerd. Laat het me weten als u opnieuw wilt plannen."
+    - text: "No problem! I have canceled your booking. Let me know if you need another date."
+    - text: "Geen probleem! Ik heb uw afspraak geannuleerd. Laat het me weten als u een nieuwe afspraak wilt."
 
   utter_goodbye:
-  - text: "Bye"
+    - text: "Thanks for reaching out! Have a great day! 😊"
+    - text: "See you soon! 🚀"
+    - text: "Bedankt! Fijne dag verder!"
+    - text: "Tot snel! 😊"
 
-  utter_iamabot:
-  - text: "I am a bot, powered by Rasa."
 
 session_config:
   session_expiration_time: 60

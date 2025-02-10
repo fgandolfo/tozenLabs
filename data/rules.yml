@@ -7,7 +7,16 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
-- rule: Say 'I am a bot' anytime the user challenges
+- rule: Activate appointment form
   steps:
-  - intent: bot_challenge
-  - action: utter_iamabot
+    - intent: book_appointment
+    - action: appointment_form
+    - active_loop: appointment_form
+
+- rule: Submit the form
+  condition:
+    - active_loop: appointment_form
+  steps:
+    - action: appointment_form
+    - active_loop: null
+    - action: action_book_appointment
