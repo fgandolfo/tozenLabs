@@ -11,73 +11,404 @@ nlu:
     - Good evening
     - What's up?
     - Hi, I need some help
-    - Hallo
-    - Hoi
-    - Goedemorgen
-    - Goedemiddag
-    - Goedenavond
+    - Greetings!
+    - Hey, how are you?
+    - Hi, can you assist me?
+    - Yo!
+    - Howdy!
+    - Morning!
+    - Evening!
+    - Hi bot!
+    - Hey there, I need assistance.
+    - Hi! Can you help me with something?
+    - Hello, is anyone there?
+    - Hey, do you have a second?
+    - Hi, quick question!
+    - Hello, I'd like some information.
+    - Hi, can I ask you something?
+    - Hey, what's up?
+    - Hi! Need some support.
+    - Hello! Can I talk to you?
+    - Hi, I have a question.
+    - Greetings, how can you help?
+    - Hello! I'd like some details.
+    - Hey, I need some guidance.
+    - Hi, I need an update.
+    - Hello, just checking in.
+    - Hi, hope you're doing well!
+    - Good day!
+    - Sup?
+    - Hey, good to see you!
+    - Hi there! What can you do?
+    - Hi! Quick inquiry.
+    - Yo, bot!
+    - What's happening?
+    - Hi! I have a request.
+    - Hello! What's new?
+    - Hi, got a sec?
+    - Hey, let's chat.
+    - Hi, any updates?
+    - Hello, can you help me out?
+    - Good to see you!
+    - Hey, need a quick response.
+    - Hello! I need to check something.
+    - Hey, can we talk?
 
 - intent: book_appointment
   examples: |
     - I need to book an appointment
-    - I’d like to schedule a meeting
+    - I'd like to schedule a meeting
     - Can I book a time with you?
     - I want an appointment
     - Do you have available times?
     - When can I come in?
     - I want to make a reservation
-    - Ik wil een afspraak maken
-    - Kan ik een afspraak plannen?
-    - Wanneer ben je beschikbaar?
-    - Ik wil een tijd reserveren
+    - How do I book an appointment?
+    - Can I schedule a consultation?
+    - I'd like to book a time slot.
+    - Can I set up a meeting?
+    - I need a booking.
+    - Please schedule an appointment for me.
+    - When is the earliest I can book?
+    - Can you arrange a meeting for me?
+    - How can I schedule a visit?
+    - Can I book a slot for tomorrow?
+    - I want to see a specialist, when can I come?
+    - How do I reserve an appointment?
+    - Is there a way to schedule a visit?
+    - I'd like to fix an appointment.
+    - I want to lock in a time.
+    - Can you set up a time for me?
+    - How soon can I get an appointment?
+    - I need a meeting scheduled.
+    - Please book me in for a visit.
+    - When can I come by?
+    - I need to see someone, how do I book?
+    - Do you have any slots available today?
+    - How do I arrange a booking?
+    - Can I secure a time slot?
+    - Book me for an appointment.
+    - I'd like to schedule a session.
+    - I'd like to request a time.
+    - Can I arrange an appointment?
+    - What's the process to book a meeting?
+    - I need to schedule something ASAP.
+    - How do I confirm an appointment?
+    - Please book a session for me.
+    - I need to schedule a consultation.
+    - Can you check availability for me?
+    - I'd like to sign up for an appointment.
+    - Book a visit for me, please.
+    - I need to see someone, what's available?
+    - When is the next available slot?
+    - Can you check the calendar for me?
+    - I want to reserve a slot.
+    - Please confirm my booking request.
+    - How do I make an official appointment?
+    - Please schedule a meeting at the earliest available time.
 
 - intent: ask_available_dates
   examples: |
     - What dates are available?
-    - Show me the open  s
+    - Show me the open slots.
     - When can I book an appointment?
     - Can you send me a list of available times?
-    - Welke datums zijn beschikbaar?
-    - Laat me de vrije tijden zien
-    - Wat zijn de mogelijke tijden voor een afspraak?
-    - Wanneer kan ik langskomen?
+    - What are my options for scheduling?
+    - When do you have an opening?
+    - I need to see availability.
+    - What time slots are open?
+    - When is the next free appointment?
+    - Is there availability this week?
+    - Can I get an appointment this weekend?
+    - When can I come in for a visit?
+    - Show me the earliest available time.
+    - What's the next open slot?
+    - Do you have time next Monday?
+    - Can you check the calendar for me?
+    - Any free appointments in the morning?
+    - Can I see the available dates?
+    - What's the soonest appointment I can get?
+    - How far in advance do I need to book?
+    - Are there any last-minute openings?
+    - Can I get a slot for tomorrow?
+    - What are the available time slots?
+    - Do you have appointments in the evening?
+    - Can you provide me with a schedule?
+    - I need to check your availability.
+    - Any open slots next week?
+    - What's your availability like?
+    - Do you have any urgent openings?
+    - Show me the upcoming appointment times.
+    - When is the best time to book?
+    - How soon can I get in?
+    - Any appointments before noon?
+    - Can I see your available times for next week?
+    - I need to book for next month, what dates are open?
+    - When is the calendar open for new bookings?
+    - Are there any cancellations I can take?
+    - What's your first available time slot?
+    - When can I schedule a time?
+    - Do you have any time slots open today?
+    - Can I get an urgent booking?
+    - What's the next time I can come in?
+    - Are there any weekend appointments available?
+    - I need to reschedule, when do you have time?
+    - Can I check the time slots?
+    - What are your appointment hours?
+    - Show me the weekly availability.
+    - What dates can I choose from?
+    - When can I book an appointment this month?
+    - What times are still available?
 
 - intent: select_date
   examples: |
-    - I choose [Monday](date)
-    - Let’s go with [February 10](date)
-    - Book me for [next Friday](date)
-    - Can I come in on [Wednesday afternoon](date)?
-    - Ik kies [maandag](date)
-    - Laten we gaan voor [10 februari](date)
-    - Plan mij in voor [volgende vrijdag](date)
-    - Kan ik op [woensdagmiddag](date) komen?
+    - I want to book for Monday
+    - Can I schedule it for next Friday?
+    - How about the 10th of this month?
+    - I prefer the morning slot on Tuesday
+    - Can I select a time for next week?
+    - Let's do 3 PM tomorrow
+    - Can I book for next weekend?
+    - Do you have any slots for next Wednesday?
+    - I'll take the first available date
+    - I want the earliest appointment you have
+    - Schedule me for Thursday at 11 AM
+    - Can we book for the 20th?
+    - I'd like a morning appointment
+    - Any available dates for next week?
+    - Let's go with next Monday at 2 PM
+    - Can I choose a date in the afternoon?
+    - I'd like something in the evening
+    - What's available on Saturday?
+    - Let's book a time for the last week of the month
+    - I'd like to confirm the slot for Friday
+    - When is the next open evening slot?
+    - Can I book for next Thursday at noon?
+    - Is the 5th still available?
+    - What's the soonest available date?
+    - Can I take a slot next week?
+    - I'd like to schedule an appointment for next Monday
+    - I'll go with the 3rd at 10 AM
+    - I prefer a weekend appointment
+    - Can we set up a meeting on the 15th?
+    - I'd like the earliest available appointment next month
+    - Can you book me for the 22nd?
+    - When is the next available morning slot?
+    - Let's confirm for Wednesday at noon
+    - Can I get something in the afternoon?
+    - Let's schedule for next Sunday
+    - How about a Friday morning slot?
+    - Can I book for the end of this month?
+    - I'll take the next open date
+    - Any chance of booking on a holiday?
+    - Can you schedule for the beginning of next month?
+    - Do you have availability for this Friday?
+    - Let's go with the first available appointment
+    - Can I book for next Tuesday at 4 PM?
+    - When's the soonest appointment?
+    - What's the earliest I can book?
+    - I need a slot for tomorrow morning
+    - Can we do next Thursday?
+    - I want to pick a date for next week
+    - Let's schedule something for the weekend
 
 - intent: confirm_appointment
   examples: |
-    - That time works for me
-    - Yes, please confirm the booking
-    - Book it!
-    - Perfect, lock in that time
-    - Ja, bevestig de afspraak
-    - Die tijd werkt voor mij
-    - Plan het maar in
-    - Perfect, leg die tijd vast
+    - Yes, that date works for me
+    - I confirm my appointment for that time
+    - That's perfect, let's go ahead
+    - Sounds good, book it
+    - Yes, I agree to that time slot
+    - Let's finalize this appointment
+    - Confirm my booking for Tuesday
+    - I'm okay with that schedule
+    - That's a great time, confirm it
+    - I'm happy with that time slot
+    - Please proceed with the booking
+    - Lock that date in for me
+    - Yes, schedule me for that date
+    - I'll take that time
+    - Go ahead and confirm it
+    - I accept this appointment time
+    - That's the one I want, book it
+    - I'm good with that time
+    - Finalize my appointment for next week
+    - That's the time I need, confirm it
+    - Yes, let's book it
+    - I'll take that spot
+    - I agree to this booking
+    - Proceed with the confirmation
+    - That works for me, confirm it
+    - I'm fine with that date
+    - Please finalize my appointment
+    - Yes, schedule it at that time
+    - Book it for me, please
+    - I'd like to confirm that date
+    - That's a suitable time, confirm it
+    - Yes, let's proceed with the booking
+    - Confirm my slot for Thursday
+    - That works, please book it
+    - Let's move forward with that time
+    - Yes, I'd like to confirm the appointment
+    - That's the time I want, schedule it
+    - I approve this appointment
+    - Yes, I'll take that date
+    - It's a deal, confirm it
+    - That's my preferred time, lock it in
+    - Yes, book that time for me
+    - That's great, let's finalize it
+    - I'm confirming the appointment
+    - Yes, I'm happy with that slot
+    - That's the time I'll go with
+    - Please proceed with the confirmation
+    - That's what I want, book it
+    - Confirm my schedule for that time
 
 - intent: cancel_appointment
   examples: |
     - I need to cancel my appointment
-    - Can I reschedule?
-    - I can’t make it, sorry
-    - Annuleer mijn afspraak
-    - Ik moet mijn afspraak verzetten
-    - Ik kan niet komen
+    - Can I reschedule? I have to cancel
+    - Cancel my booking for Thursday
+    - Please remove my scheduled appointment
+    - I won't be able to make it, cancel it
+    - I need to change my appointment
+    - Can I cancel and book another time?
+    - Cancel my reservation
+    - Please cancel my time slot
+    - I can't make it, cancel my meeting
+    - Remove my booking for next week
+    - I have to cancel, I'm not available
+    - Change my appointment to a later date
+    - Please cancel my scheduled slot
+    - I'd like to cancel my upcoming appointment
+    - Cancel my appointment and let me know other options
+    - I can't make it, please cancel
+    - Please remove my name from the schedule
+    - I won't be attending, cancel my booking
+    - Can you cancel my scheduled visit?
+    - I have a conflict, cancel my appointment
+    - I can't come, please cancel
+    - Cancel my visit for tomorrow
+    - Please remove my reservation
+    - I won't be available, cancel it
+    - Let's cancel my meeting
+    - I'd like to cancel and rebook
+    - Remove my name from the list
+    - I can't make it, please remove my booking
+    - Cancel my appointment for now
+    - I won't need the slot, cancel it
+    - I'll reschedule later, cancel it
+    - Please cancel my upcoming booking
 
 - intent: goodbye
   examples: |
-    - Thank you!
-    - Bye!
-    - See you later
-    - Tot ziens
-    - Bedankt!
-    - Fijne dag nog
+    - Goodbye!
+    - See you later.
+    - Talk to you soon.
+    - Have a great day!
+    - Thanks, bye!
+    - Take care.
+    - Catch you later.
+    - Bye for now.
+    - See you around.
+    - Talk later!
+    - I'm signing off, bye!
+    - See you next time.
+    - Have a good one!
+    - Thanks for the help, goodbye.
+    - Later!
+    - Bye, have a great day.
+    - See ya!
+    - Peace out.
+    - I'm off, take care!
+    - Have a nice day, bye!
+    - That's all for now, bye!
+    - See you again soon.
+    - I'll be back later, bye!
+    - Thanks, I'll catch you later.
+    - Ciao!
+    - Adios!
+    - I'm done here, goodbye.
+    - Talk to you another time.
+    - I appreciate it, bye!
+    - Have a good evening, bye!
+    - Thanks a lot, see you!
+    - Ok, I'm leaving now, bye.
+    - I'll be in touch, goodbye.
+    - That's it for now, bye!
+    - Thanks, talk soon.
+    - I have to go, see you!
+    - Alright, take care, bye!
+    - Until next time!
+    - Gotta go, see you later.
+    - Thanks for everything, goodbye.
+    - Bye, have a good rest of your day!
+    - I'll check back in later, bye!
+    - Have a great one, see you!
+    - Talk to you soon, thanks!
+    - Appreciate it, bye for now.
+    - That's all I needed, bye!
+    - Thanks for the help, see you later.
+    - I'm done, goodbye!
+    - See you in a bit!
+    - Thanks a lot, talk soon.
+
+- intent: faq
+  examples: |
+    - this is a test for gpt4
+
+- intent: reschedule_appointment
+  examples: |
+    - I would like to reschedule my appointment
+# - intent: faq
+  # examples: |
+    # - How do I book an appointment?
+    # - What are your working hours?
+    # - Do you offer same-day appointments?
+    # - Can I reschedule my booking?
+    # - How much does an appointment cost?
+    # - Where are you located?
+    # - What payment methods do you accept?
+    # - Do I need to bring anything to my appointment?
+    # - How long does an appointment take?
+    # - What happens if I'm late?
+    # - Can I cancel my appointment?
+    # - How do I confirm my booking?
+    # - Do you offer online consultations?
+    # - Is there a cancellation fee?
+    # - How soon can I book an appointment?
+    # - Do you send reminders?
+    # - How can I contact support?
+    # - Do you have weekend availability?
+    # - Can I book for someone else?
+    # - Do you accept walk-ins?
+    # - What's your refund policy?
+    # - Is there a waiting list?
+    # - How do I access my appointment details?
+    # - Can I book multiple appointments?
+    # - What's the earliest available slot?
+    # - How do I change my email for notifications?
+    # - Do you offer emergency appointments?
+    # - What's the best way to reach customer support?
+    # - Can I book via WhatsApp?
+    # - Are your services covered by insurance?
+    # - Do you have a mobile app?
+    # - What languages do you support?
+    # - Can I get a receipt for my appointment?
+    # - How do I update my contact details?
+    # - Are there discounts available?
+    # - Can I book a recurring appointment?
+    # - Do I need to create an account to book?
+    # - How do I reset my password?
+    # - What's the latest I can cancel an appointment?
+    # - How do I check my appointment status?
+    # - Is there a confirmation email?
+    # - Do you provide virtual appointments?
+    # - Can I get a reminder before my appointment?
+    # - Do you support group bookings?
+    # - What should I do if I don't receive a confirmation?
+    # - Do I need to pay upfront?
+    # - What's your no-show policy?
+    # - Can I speak with a representative before booking?
+    # - How can I provide feedback on my experience?
+    # - Do you offer follow-up consultations?

@@ -7,9 +7,9 @@ stories:
     - action: appointment_form
     - active_loop: appointment_form
     - slot_was_set:
-        - user_name: "Facundo Gandolfo"
+        - user_name
     - slot_was_set:
-        - user_email: "facu.gandolfo@gmail.com"
+        - user_email
     - active_loop: null
     - action: action_book_appointment
     - intent: confirm_appointment
@@ -40,3 +40,20 @@ stories:
   steps:
     - intent: greet
     - action: utter_greet
+
+- story: User asks a general question
+  steps:
+    - intent: faq
+    - action: utter_reschedule
+    # - action: action_chat_with_gpt
+
+- story: User wants to reschedule appointment
+  steps:
+    - intent: reschedule_appointment
+    - action: utter_reschedule
+    - active_loop: appointment_form
+    - slot_was_set:
+        - appointment_date
+    - active_loop: null
+    - action: action_reschedule_appointment
+    - action: utter_confirm_appointment

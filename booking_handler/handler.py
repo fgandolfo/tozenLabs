@@ -129,7 +129,7 @@ class GoogleHandler:
             #     }, 
             #     'eventType': 'default'
             # }
-            return event_result.get("htmlLink")
+            return event_result.get("id")
 
         except Exception as e:
             print(f"Error creating calendar event: {e}")

@@ -1,14 +1,16 @@
-from utils.constants import RASA_VALIDATION_REGEX_DATE, RASA_VALIDATION_REGEX_EMAIL, RASA_ACTION_BOOK_APPOINTMENT, RASA_ACTION_VALIDATE_FORM
+from utils.constants import RASA_VALIDATION_REGEX_DATE, RASA_VALIDATION_REGEX_EMAIL, RASA_ACTION_BOOK_APPOINTMENT, RASA_ACTION_VALIDATE_FORM, RASA_ACTION_CHAT_W_GPT, RASA_ACTION_RESCHEDULE_APPOINTMENT
 from rasa_sdk.executor import CollectingDispatcher
 from booking_handler.handler import GoogleHandler
 from utils.exceptions import AuthenticationFailed
 from rasa_sdk.forms import FormValidationAction
 from rasa_sdk import Action, Tracker
+from reponse_handler.handler import ResponseHandler
+from utils.logger import logger
 import re
-
+from infrastructure.database.database import Database
 
 booking_handler = GoogleHandler()
-
+db = Database()
 
 class ValidateAppointmentForm(FormValidationAction):
     def name(self) -> str:
@@ -51,7 +53,7 @@ class ActionBookAppointment(Action):
             return []
 
         try:
-            event_link = booking_handler.book_appointment(
+            event_id = booking_handler.book_appointment(
                 appointment_date,
                 user_email,
                 "tozenlabs@gmail.com", #client's email
@@ -59,13 +61,80 @@ class ActionBookAppointment(Action):
                 "Module tester" #title
             )
 
+            db.insert_appointment(
+                user_email,
+                appointment_date,
+                "scheduled",
+                event_id
+            )
+
+            logger.info(db.get_all_appointments())
+
         except AuthenticationFailed:
             dispatcher.utter_message(text="Authentication failed. Please try again.")
             return []
 
-        if event_link:
-            dispatcher.utter_message(text=f"Your appointment is scheduled! 📅 Invitation sent to {user_email}. \n[View event]({event_link})")
+        if event_id:
+            dispatcher.utter_message(text=f"Your appointment for {appointment_date} is scheduled! 📅 Invitation sent to {user_email}.")
         else:
             dispatcher.utter_message(text="There was an issue scheduling your appointment. Please try again later.")
+
+        return []
+
+class ActionRescheduleAppointment(Action):
+    def name(self) -> str:
+        return RASA_ACTION_RESCHEDULE_APPOINTMENT
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+        user_email = tracker.get_slot("user_email")
+        appointment_date = tracker.get_slot("appointment_date")
+
+        if not user_email or not appointment_date:
+            dispatcher.utter_message(text="I couldn't retrieve your email or new appointment date.")
+            return []
+
+        existing_appointment = db.get_appointment_by_email(user_email)
+        if not existing_appointment:
+            dispatcher.utter_message(text="I couldn't find any existing appointment for your email.")
+            return []
+
+        try:
+            event_id = booking_handler.reschedule_appointment(
+                appointment_date,
+                existing_appointment["event_id"],
+            )
+
+            # Update the appointment in the database
+            db.update_appointment(
+                existing_appointment["event_id"],
+                appointment_date
+            )
+
+        except AuthenticationFailed:
+            dispatcher.utter_message(text="Authentication failed. Please try again.")
+            return []
+        except Exception as e:
+            dispatcher.utter_message(text="There was an error rescheduling your appointment.")
+            logger.error(f"Error rescheduling appointment: {str(e)}")
+            return []
+
+        dispatcher.utter_message(text=f"Your appointment has been rescheduled! 📅 Updated invitation sent to {user_email}.")
+        return []
+
+class ActionChatWithGPT(Action):
+
+    def name(self) -> str:
+        return RASA_ACTION_CHAT_W_GPT
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+
+        user_message = tracker.latest_message.get("text")
+        logger.info(tracker.latest_message)
+
+        response = ResponseHandler().generate_response(
+            user_message
+        )
+
+        dispatcher.utter_message(text=response)
 
         return []
