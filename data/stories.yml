@@ -3,7 +3,8 @@ version: "3.1"
 stories:
 - story: User tries to book an appointment
   steps:
-    - intent: book_appointment
+    #- intent: book_appointment
+    - intent: request_booking
     - action: get_email_form
     - active_loop: get_email_form
     - slot_was_set:
@@ -34,7 +35,8 @@ stories:
   steps:
     - slot_was_set:
         - appointment_status: canceled
-    - intent: cancel_appointment
+    #- intent: cancel_appointment
+    - intent: request_cancel
     - action: action_cancel_appointment
 
 - story: Greet user and offer help (new)
@@ -50,7 +52,8 @@ stories:
 
 - story: User wants to reschedule appointment
   steps:
-    - intent: reschedule_appointment
+    - intent: request_reschedule
+    #- intent: reschedule_appointment
     - action: utter_reschedule
     - action: reschedule_form
     - active_loop: reschedule_form

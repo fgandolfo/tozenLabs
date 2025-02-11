@@ -93,14 +93,20 @@ class ActionCheckExistingAppointments(Action):
         ]
 
         if existing_appointments:
-            dispatcher.utter_message(text="You already have the following upcoming appointments:")
+            dispatcher.utter_message(text="I see that you have the following appointments:")
             
             for appt in existing_appointments:
                 formatted_date = format_appointment_date(appt["date"])
                 dispatcher.utter_message(text=f"📅 {formatted_date}")
 
-            dispatcher.utter_message(text="What would you like to do?")
-            dispatcher.utter_message(text="1️⃣ Reschedule \n2️⃣ Cancel \n3️⃣ Book a new appointment")
+            dispatcher.utter_message(
+                text="What would you like to do?",
+                buttons=[
+                    {"title": "📅 Reschedule", "payload": "/request_reschedule"},
+                    {"title": "❌ Cancel", "payload": "/request_cancel"},
+                    {"title": "➕ Book New", "payload": "/request_booking"}
+                ]
+            )
         
             logger.info(f"Existing appointments for {user_email}: {existing_appointments}")
             return [SlotSet("appointment_status", "pending_action")]

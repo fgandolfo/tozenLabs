@@ -11,6 +11,9 @@ intents:
   - goodbye
   - greet
   - faq
+  - request_reschedule
+  - request_cancel
+  - request_booking
 
 slots:
   appointment_status:
@@ -74,6 +77,16 @@ actions:
   - action_chat_with_gpt
   
 responses:
+  utter_ask_manage_appointment:
+    - text: "What would you like to do?"
+      buttons:
+        - title: "📅 Reschedule"
+          payload: "/request_reschedule"
+        - title: "❌ Cancel"
+          payload: "/request_cancel"
+        - title: "➕ Book New"
+          payload: "/request_booking"
+
   utter_greet:
     - text: "Hello! How can I assist you today? 😊"
     - text: "Hi there! What can I help you today?"

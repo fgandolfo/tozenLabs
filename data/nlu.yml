@@ -1,6 +1,36 @@
 version: "3.1"
 
 nlu:
+
+# ------------------------------------
+# ----------- BUTTONS ----------------
+# ------------------------------------
+- intent: request_reschedule
+  examples: |
+    - I want to reschedule my appointment
+    - Change my appointment date
+    - Can I move my booking to another day?
+    - Reschedule my meeting
+    - I need to select a different time
+    - Move my appointment
+
+- intent: request_cancel
+  examples: |
+    - I want to cancel my appointment
+    - Cancel my booking
+    - Delete my appointment
+    - I don't need the appointment anymore
+    - Remove my booking
+
+- intent: request_booking
+  examples: |
+    - I want to book a new appointment
+    - Schedule a new session
+    - I need a new appointment
+    - Set up a new meeting
+    - Book me an appointment
+# ------------------------------------
+
 - intent: greet
   examples: |
     - Hello
