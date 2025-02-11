@@ -166,7 +166,7 @@ class GoogleHandler:
 
             updated_appointment =  service.events().update(calendarId=calendar_id, eventId=event_id, body=event).execute()
 
-            return updated_appointment
+            return updated_appointment["id"]
 
         except Exception as e:
             logger.error(f"Error rescheduling event: {e}")

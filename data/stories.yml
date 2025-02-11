@@ -1,40 +1,41 @@
 version: "3.1"
 
 stories:
-- story: User books an appointment
+- story: User tries to book an appointment
   steps:
     - intent: book_appointment
-    - action: appointment_form
-    - active_loop: appointment_form
-    - slot_was_set:
-        - user_name
+    - action: get_email_form
+    - active_loop: get_email_form
     - slot_was_set:
         - user_email
     - active_loop: null
-    - action: action_book_appointment
-    - intent: confirm_appointment
-    - action: utter_confirm_appointment
+    - action: action_check_existing_appointments
+    - slot_was_set:
+        - appointment_status: pending_action
+    - intent: select_option
+    - action: action_process_option
 
-- story: User asks for available dates first
+- story: User books an appointment
   steps:
-    - intent: ask_available_dates
-    - action: utter_show_available_dates
-    - action: action_get_available_dates
-    - intent: book_appointment
+    - slot_was_set:
+        - appointment_status: booking_new
     - action: appointment_form
     - active_loop: appointment_form
-    - intent: select_date
+    - slot_was_set:
+        - requested_slot: user_name
+    - slot_was_set:
+        - requested_slot: user_email
+    - slot_was_set:
+        - requested_slot: appointment_date
+    - active_loop: null
     - action: action_book_appointment
-    - intent: confirm_appointment
-    - action: utter_confirm_appointment
 
 - story: User cancels an appointment
   steps:
+    - slot_was_set:
+        - appointment_status: canceled
     - intent: cancel_appointment
-    - action: utter_cancel_appointment
     - action: action_cancel_appointment
-    - intent: goodbye
-    - action: utter_goodbye
 
 - story: Greet user and offer help (new)
   steps:
@@ -51,9 +52,21 @@ stories:
   steps:
     - intent: reschedule_appointment
     - action: utter_reschedule
-    - active_loop: appointment_form
+    - action: reschedule_form
+    - active_loop: reschedule_form
     - slot_was_set:
-        - appointment_date
+        - requested_slot: user_email
+    - slot_was_set:
+        - requested_slot: appointment_date
     - active_loop: null
     - action: action_reschedule_appointment
-    - action: utter_confirm_appointment
+
+- story: User wants to know current appointments
+  steps:
+    - intent: get_appointments
+    - action: get_email_form
+    - active_loop: get_email_form
+    - slot_was_set:
+        - user_email
+    - active_loop: null
+    - action: action_get_appointments

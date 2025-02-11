@@ -1,58 +1,135 @@
-from utils.constants import RASA_VALIDATION_REGEX_DATE, RASA_VALIDATION_REGEX_EMAIL, RASA_ACTION_BOOK_APPOINTMENT, RASA_ACTION_VALIDATE_FORM, RASA_ACTION_CHAT_W_GPT, RASA_ACTION_RESCHEDULE_APPOINTMENT
-from rasa_sdk.executor import CollectingDispatcher
-from booking_handler.handler import GoogleHandler
-from utils.exceptions import AuthenticationFailed
-from rasa_sdk.forms import FormValidationAction
-from rasa_sdk import Action, Tracker
-from reponse_handler.handler import ResponseHandler
-from utils.logger import logger
-import re
+from utils.constants import RASA_VALIDATION_REGEX_DATE, RASA_VALIDATION_REGEX_EMAIL, RASA_ACTION_BOOK_APPOINTMENT, RASA_ACTION_VALIDATE_FORM, RASA_ACTION_CHAT_W_GPT, RASA_ACTION_RESCHEDULE_APPOINTMENT, RASA_ACTION_GET_APPOINTMENTS, RASA_ACTION_CANCEL_APPOINTMENT, RASA_ACTION_CHECK_EXISTING_APPOINTMENTS, RASA_ACTION_PROCESS_OPTION, DB_STATUS_SCHEDULED, DB_STATUS_DONE, DB_STATUS_CANCELED
 from infrastructure.database.database import Database
+from reponse_handler.handler import ResponseHandler
+from rasa_sdk.events import SlotSet, FollowupAction
+from rasa_sdk.executor import CollectingDispatcher
+from utils.exceptions import AuthenticationFailed
+from booking_handler.handler import GoogleHandler
+from rasa_sdk.forms import FormValidationAction
+from utils.utils import format_appointment_date
+from rasa_sdk import Action, Tracker
+from typing import Dict, Text, Any
+from utils.logger import logger
+from datetime import datetime
+import re
 
+# ------------------------------------
+# ----------- HANDLERS ---------------
+# ------------------------------------
 booking_handler = GoogleHandler()
 db = Database()
+# ------------------------------------
 
+# ---------------------------------------
+# ----------- VALIDATIONS ---------------
+# ---------------------------------------
 class ValidateAppointmentForm(FormValidationAction):
     def name(self) -> str:
         return RASA_ACTION_VALIDATE_FORM
 
     def validate_user_name(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
-        if len(slot_value) < 2:
+        if slot_value and len(slot_value) < 2:
             dispatcher.utter_message(text="Name must be at least 2 characters long.")
             return { "user_name": None }
         
         return { "user_name": slot_value }
 
     def validate_user_email(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
-        if not re.match(RASA_VALIDATION_REGEX_EMAIL, slot_value):
+        if slot_value and not re.match(RASA_VALIDATION_REGEX_EMAIL, slot_value):
             dispatcher.utter_message(text="Invalid email format. Please enter a valid email.")
             return { "user_email": None }
         
         return { "user_email": slot_value }
 
     def validate_appointment_date(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
+        if not slot_value:
+            return {"appointment_date": None}
+        
         if not re.match(RASA_VALIDATION_REGEX_DATE, slot_value):
             dispatcher.utter_message(text="Invalid date format! Please use YYYY-MM-DD HH:MM (e.g., 2025-02-10 14:30).")
-            return { "appointment_date": None }
+            return {"appointment_date": None}
         
-        return { "appointment_date": slot_value }
+        try:
+            date_obj = datetime.strptime(slot_value, "%Y-%m-%d %H:%M")
+            if date_obj < datetime.now():
+                dispatcher.utter_message(text="Please select a future date and time.")
+                return {"appointment_date": None}
+        except ValueError:
+            dispatcher.utter_message(text="Invalid date. Please provide a valid date and time.")
+            return {"appointment_date": None}
+        
+        return {"appointment_date": slot_value}
+# ---------------------------------------
+
+# -----------------------------------
+# ----------- ACTIONS ---------------
+# -----------------------------------
+class ActionCheckExistingAppointments(Action):
+    """
+    This action checks if a user has any existing appointments and provides options
+    to manage them. If appointments exist, it displays them and offers options to:
+    1. Reschedule
+    2. Cancel
+    3. Book a new appointment
+
+    If no appointments exist, it starts the appointment booking flow.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
+    def name(self) -> str:
+        return RASA_ACTION_CHECK_EXISTING_APPOINTMENTS
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+
+        user_email = tracker.get_slot("user_email")
+
+        existing_appointments = db.display_appointments_by_email(user_email)
+        existing_appointments = [
+            appt for appt in existing_appointments
+            if appt["status"].upper() not in [DB_STATUS_DONE, DB_STATUS_CANCELED]
+            and datetime.strptime(appt["date"], "%Y-%m-%d %H:%M").date() >= datetime.today().date()
+        ]
+
+        if existing_appointments:
+            dispatcher.utter_message(text="You already have the following upcoming appointments:")
+            
+            for appt in existing_appointments:
+                formatted_date = format_appointment_date(appt["date"])
+                dispatcher.utter_message(text=f"📅 {formatted_date}")
+
+            dispatcher.utter_message(text="What would you like to do?")
+            dispatcher.utter_message(text="1️⃣ Reschedule \n2️⃣ Cancel \n3️⃣ Book a new appointment")
+        
+            logger.info(f"Existing appointments for {user_email}: {existing_appointments}")
+            return [SlotSet("appointment_status", "pending_action")]
+
+        logger.info(f"No existing appointments for {user_email}")
+        dispatcher.utter_message(text="Great! You don't have any scheduled appointments so let's get you one! 😄")
+        return [SlotSet("appointment_status", "booking_new"), FollowupAction("appointment_form")]
 
 class ActionBookAppointment(Action):
-    
+    """
+    This action books a new appointment for a user.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
     def name(self) -> str:
         return RASA_ACTION_BOOK_APPOINTMENT
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
-        
-        user_email = tracker.get_slot("user_email")
-        user_name = tracker.get_slot("user_name")
-        appointment_date = tracker.get_slot("appointment_date")
-
-        if not user_email or not appointment_date:
-            dispatcher.utter_message(text="I couldn't retrieve your email or appointment date.")
-            return []
-
         try:
+            user_email = tracker.get_slot("user_email")
+            user_name = tracker.get_slot("user_name")
+            appointment_date = tracker.get_slot("appointment_date")
+
+            if not all([user_email, user_name, appointment_date]):
+                dispatcher.utter_message(text="Missing required information. Please provide email and appointment date.")
+                return []
+            
             event_id = booking_handler.book_appointment(
                 appointment_date,
                 user_email,
@@ -64,24 +141,40 @@ class ActionBookAppointment(Action):
             db.insert_appointment(
                 user_email,
                 appointment_date,
-                "scheduled",
+                DB_STATUS_SCHEDULED,
                 event_id
             )
 
-            logger.info(db.get_all_appointments())
+            logger.info(f"Appointment booked {user_email}, {user_name}, {appointment_date}")
 
-        except AuthenticationFailed:
-            dispatcher.utter_message(text="Authentication failed. Please try again.")
-            return []
+            if event_id:
+                dispatcher.utter_message(text=f"Your appointment for {appointment_date} is scheduled! 📅 Invitation sent to {user_email}.")
+            else:
+                dispatcher.utter_message(text="There was an issue scheduling your appointment. Please try again later.")
 
-        if event_id:
-            dispatcher.utter_message(text=f"Your appointment for {appointment_date} is scheduled! 📅 Invitation sent to {user_email}.")
-        else:
-            dispatcher.utter_message(text="There was an issue scheduling your appointment. Please try again later.")
+            return [
+                SlotSet("appointment_date", None),
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
 
-        return []
+        except Exception as e:
+            logger.error(f"Error booking appointment: {str(e)}")
+            dispatcher.utter_message(text="An unexpected error occurred. Please try again later.")
+            return [
+                SlotSet("appointment_date", None),
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
 
 class ActionRescheduleAppointment(Action):
+    """
+    This action reschedules an existing appointment for a user.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
     def name(self) -> str:
         return RASA_ACTION_RESCHEDULE_APPOINTMENT
 
@@ -93,7 +186,14 @@ class ActionRescheduleAppointment(Action):
             dispatcher.utter_message(text="I couldn't retrieve your email or new appointment date.")
             return []
 
-        existing_appointment = db.get_appointment_by_email(user_email)
+        existing_appointment = db.display_appointments_by_email(user_email)
+        latest_appointment = list(filter(lambda x: x["status"].upper() == DB_STATUS_SCHEDULED, existing_appointment))
+
+        try:
+            latest_appointment_id = latest_appointment[0].get("appointment_id")
+        except IndexError:
+            raise Exception(f"I couldn't find any existing scheduled appointments for the email {user_email}")
+        
         if not existing_appointment:
             dispatcher.utter_message(text="I couldn't find any existing appointment for your email.")
             return []
@@ -101,28 +201,109 @@ class ActionRescheduleAppointment(Action):
         try:
             event_id = booking_handler.reschedule_appointment(
                 appointment_date,
-                existing_appointment["event_id"],
+                latest_appointment_id,
             )
 
-            # Update the appointment in the database
-            db.update_appointment(
-                existing_appointment["event_id"],
+            db.reschedule_appointment(
+                event_id,
                 appointment_date
             )
 
         except AuthenticationFailed:
             dispatcher.utter_message(text="Authentication failed. Please try again.")
-            return []
+            return [
+                SlotSet("appointment_date", None),
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
         except Exception as e:
             dispatcher.utter_message(text="There was an error rescheduling your appointment.")
             logger.error(f"Error rescheduling appointment: {str(e)}")
-            return []
+            return [
+                SlotSet("appointment_date", None),
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
 
+        logger.info(f"Appointment rescheduled. {user_email}, {appointment_date}")
         dispatcher.utter_message(text=f"Your appointment has been rescheduled! 📅 Updated invitation sent to {user_email}.")
-        return []
+        return [
+            SlotSet("appointment_date", None),
+            SlotSet("requested_slot", None),
+            SlotSet("appointment_status", "pending_action")
+        ]
+
+class ActionCancelAppointment(Action):
+    """
+    This action reschedules an existing appointment for a user.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
+    def name(self) -> str:
+        return RASA_ACTION_CANCEL_APPOINTMENT
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+        user_email = tracker.get_slot("user_email")
+
+        if not user_email:
+            dispatcher.utter_message(text="I couldn't retrieve your email or new appointment date.")
+            return [
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
+
+        
+        existing_appointment = db.display_appointments_by_email(user_email)
+        latest_appointment = list(filter(lambda x: x["status"].upper() == DB_STATUS_SCHEDULED, existing_appointment))
+
+        try:
+            latest_appointment_id = latest_appointment[0].get("appointment_id")
+        except IndexError:
+            dispatcher.utter_message(text=f"I couldn't find any existing scheduled appointments for the email {user_email}")
+            return [
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
+
+        try:
+            booking_handler.cancel_appointment(
+                latest_appointment_id
+            )
+            db.update_appointment_status(
+                latest_appointment_id,
+                "canceled"
+            )
+
+        except AuthenticationFailed:
+            dispatcher.utter_message(text="Authentication failed. Please try again.")
+            return [
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
+        except Exception as e:
+            dispatcher.utter_message(text="There was an error canceling your appointment.")
+            logger.error(f"Error canceling appointment: {str(e)}")
+            return [
+                SlotSet("requested_slot", None),
+                SlotSet("appointment_status", "pending_action")
+            ]
+
+        dispatcher.utter_message(text="📅 Your appointment has been canceled!")
+        return [
+            SlotSet("requested_slot", None),
+            SlotSet("appointment_status", "pending_action")
+        ]
 
 class ActionChatWithGPT(Action):
+    """
+    This action allows the user to chat with the GPT model.
 
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
     def name(self) -> str:
         return RASA_ACTION_CHAT_W_GPT
 
@@ -138,3 +319,76 @@ class ActionChatWithGPT(Action):
         dispatcher.utter_message(text=response)
 
         return []
+
+class ActionGetAppointments(Action):
+    """
+    This action displays the user's upcoming appointments.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
+    def name(self) -> str:
+        return RASA_ACTION_GET_APPOINTMENTS
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+        user_email = tracker.get_slot("user_email")
+        appointments = db.display_appointments_by_email(user_email)
+
+        appointments = [
+            appt for appt in appointments
+            if appt["status"].upper() not in [DB_STATUS_DONE, DB_STATUS_CANCELED]
+            and datetime.strptime(appt["date"], "%Y-%m-%d %H:%M").date() >= datetime.today().date()
+        ]
+
+        if not appointments:
+            dispatcher.utter_message(text="No appointments found for this email.")
+            return []
+        
+        sorted_appointments = sorted(appointments, key=lambda appt: datetime.strptime(appt["date"], "%Y-%m-%d %H:%M"))
+        mapped_dates = list(map(lambda x: x["date"], sorted_appointments))
+
+        response_message = "📅 Your Upcoming Appointments:\n\n"
+
+        for date in mapped_dates:
+            formatted_date = format_appointment_date(date)
+            response_message += f"🔹 {formatted_date}\n"
+
+        logger.info(f"Retrieved all appointments for {user_email}")
+        dispatcher.utter_message(text=response_message)
+        return [
+            SlotSet("requested_slot", None),
+            SlotSet("appointment_status", "pending_action")
+        ]
+
+class ActionProcessOption(Action):
+    """
+    This action processes the user's choice from the list of options.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
+    def name(self):
+        return RASA_ACTION_PROCESS_OPTION
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]):
+        user_choice = tracker.latest_message.get("text")
+        logger.info(tracker.latest_message)
+
+        if user_choice == "1":
+            dispatcher.utter_message(text="Let's reschedule your appointment.")
+            return [SlotSet("appointment_status", "reschedule"), FollowupAction("reschedule_form")]
+
+        elif user_choice == "2":
+            return [SlotSet("appointment_status", "canceled"), FollowupAction("action_cancel_appointment")]
+
+        elif user_choice == "3":
+            dispatcher.utter_message(text="Alright! Let's book a new appointment.")
+            return [SlotSet("appointment_status", "booking_new"), FollowupAction("appointment_form")]
+
+        else:
+            dispatcher.utter_message(text="I didn't understand that. Please enter any of the 3 options.")
+            return []
+
+# -----------------------------------

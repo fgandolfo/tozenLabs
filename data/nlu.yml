@@ -57,30 +57,24 @@ nlu:
 - intent: book_appointment
   examples: |
     - I need to book an appointment
-    - I'd like to schedule a meeting
     - Can I book a time with you?
     - I want an appointment
     - Do you have available times?
     - When can I come in?
     - I want to make a reservation
     - How do I book an appointment?
-    - Can I schedule a consultation?
     - I'd like to book a time slot.
     - Can I set up a meeting?
     - I need a booking.
-    - Please schedule an appointment for me.
     - When is the earliest I can book?
     - Can you arrange a meeting for me?
-    - How can I schedule a visit?
     - Can I book a slot for tomorrow?
     - I want to see a specialist, when can I come?
     - How do I reserve an appointment?
-    - Is there a way to schedule a visit?
     - I'd like to fix an appointment.
     - I want to lock in a time.
     - Can you set up a time for me?
     - How soon can I get an appointment?
-    - I need a meeting scheduled.
     - Please book me in for a visit.
     - When can I come by?
     - I need to see someone, how do I book?
@@ -88,14 +82,11 @@ nlu:
     - How do I arrange a booking?
     - Can I secure a time slot?
     - Book me for an appointment.
-    - I'd like to schedule a session.
     - I'd like to request a time.
     - Can I arrange an appointment?
     - What's the process to book a meeting?
-    - I need to schedule something ASAP.
     - How do I confirm an appointment?
     - Please book a session for me.
-    - I need to schedule a consultation.
     - Can you check availability for me?
     - I'd like to sign up for an appointment.
     - Book a visit for me, please.
@@ -105,65 +96,11 @@ nlu:
     - I want to reserve a slot.
     - Please confirm my booking request.
     - How do I make an official appointment?
-    - Please schedule a meeting at the earliest available time.
-
-- intent: ask_available_dates
-  examples: |
-    - What dates are available?
-    - Show me the open slots.
-    - When can I book an appointment?
-    - Can you send me a list of available times?
-    - What are my options for scheduling?
-    - When do you have an opening?
-    - I need to see availability.
-    - What time slots are open?
-    - When is the next free appointment?
-    - Is there availability this week?
-    - Can I get an appointment this weekend?
-    - When can I come in for a visit?
-    - Show me the earliest available time.
-    - What's the next open slot?
-    - Do you have time next Monday?
-    - Can you check the calendar for me?
-    - Any free appointments in the morning?
-    - Can I see the available dates?
-    - What's the soonest appointment I can get?
-    - How far in advance do I need to book?
-    - Are there any last-minute openings?
-    - Can I get a slot for tomorrow?
-    - What are the available time slots?
-    - Do you have appointments in the evening?
-    - Can you provide me with a schedule?
-    - I need to check your availability.
-    - Any open slots next week?
-    - What's your availability like?
-    - Do you have any urgent openings?
-    - Show me the upcoming appointment times.
-    - When is the best time to book?
-    - How soon can I get in?
-    - Any appointments before noon?
-    - Can I see your available times for next week?
-    - I need to book for next month, what dates are open?
-    - When is the calendar open for new bookings?
-    - Are there any cancellations I can take?
-    - What's your first available time slot?
-    - When can I schedule a time?
-    - Do you have any time slots open today?
-    - Can I get an urgent booking?
-    - What's the next time I can come in?
-    - Are there any weekend appointments available?
-    - I need to reschedule, when do you have time?
-    - Can I check the time slots?
-    - What are your appointment hours?
-    - Show me the weekly availability.
-    - What dates can I choose from?
-    - When can I book an appointment this month?
-    - What times are still available?
 
 - intent: select_date
   examples: |
     - I want to book for Monday
-    - Can I schedule it for next Friday?
+    - Can I set it for next Friday?
     - How about the 10th of this month?
     - I prefer the morning slot on Tuesday
     - Can I select a time for next week?
@@ -267,7 +204,6 @@ nlu:
 - intent: cancel_appointment
   examples: |
     - I need to cancel my appointment
-    - Can I reschedule? I have to cancel
     - Cancel my booking for Thursday
     - Please remove my scheduled appointment
     - I won't be able to make it, cancel it
@@ -297,7 +233,6 @@ nlu:
     - I can't make it, please remove my booking
     - Cancel my appointment for now
     - I won't need the slot, cancel it
-    - I'll reschedule later, cancel it
     - Please cancel my upcoming booking
 
 - intent: goodbye
@@ -359,7 +294,31 @@ nlu:
 
 - intent: reschedule_appointment
   examples: |
-    - I would like to reschedule my appointment
+    - I need to reschedule my appointment for another date.
+    - Can I change the time of my appointment?
+    - I'd like to move my booking to a different day.
+    - Is it possible to postpone my appointment?
+    - I want to modify my appointment schedule.
+    - Can you help me change my appointment time?
+    - I need to rebook my appointment for a later date.
+    - I won't be able to make it; can we reschedule?
+    - I'd like to push my appointment to another time.
+    - Something came up, and I need to change my appointment.
+
+- intent: get_appointments
+  examples: |
+    - What are my current appointments?
+    - What appointments do I have?
+    - Show me my appointments
+
+- intent: select_option
+  examples: |
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+
 # - intent: faq
   # examples: |
     # - How do I book an appointment?

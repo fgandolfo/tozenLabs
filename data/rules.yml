@@ -1,5 +1,3 @@
-version: "3.1"
-
 rules:
 
 - rule: Say goodbye anytime the user says goodbye
@@ -7,11 +5,15 @@ rules:
   - intent: goodbye
   - action: utter_goodbye
 
-- rule: Activate appointment form
+
+- rule: Automatically start booking when no existing appointments
+  condition:
+    - slot_was_set:
+        - appointment_status: booking_new
   steps:
-    - intent: book_appointment
     - action: appointment_form
     - active_loop: appointment_form
+
 
 - rule: Submit the form
   condition:
