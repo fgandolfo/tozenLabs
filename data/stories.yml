@@ -3,8 +3,7 @@ version: "3.1"
 stories:
 - story: User tries to book an appointment
   steps:
-    #- intent: book_appointment
-    - intent: request_booking
+    - intent: book_appointment
     - action: get_email_form
     - active_loop: get_email_form
     - slot_was_set:
@@ -16,7 +15,21 @@ stories:
     - intent: select_option
     - action: action_process_option
 
-- story: User books an appointment
+- story: User books a new appointment (through button)
+  steps:
+    - intent: request_booking
+    - action: appointment_form
+    - active_loop: appointment_form
+    - slot_was_set:
+        - requested_slot: user_name
+    - slot_was_set:
+        - requested_slot: user_email
+    - slot_was_set:
+        - requested_slot: appointment_date
+    - active_loop: null
+    - action: action_book_appointment
+
+- story: User books an appointment (through intent)
   steps:
     - slot_was_set:
         - appointment_status: booking_new
@@ -31,13 +44,47 @@ stories:
     - active_loop: null
     - action: action_book_appointment
 
-- story: User cancels an appointment
+- story: User cancels an appointment and books a new one (through button)
   steps:
     - slot_was_set:
         - appointment_status: canceled
-    #- intent: cancel_appointment
     - intent: request_cancel
     - action: action_cancel_appointment
+    - action: utter_cancel_appointment
+    - intent: affirm
+    - action: appointment_form
+    - action: action_book_appointment
+
+- story: User cancels an appointment and ends flow (through button)
+  steps:
+    - slot_was_set:
+        - appointment_status: canceled
+    - intent: request_cancel
+    - action: action_cancel_appointment
+    - action: utter_cancel_appointment
+    - intent: deny
+    - action: action_end_flow
+
+- story: User cancels an appointment and books a new one (through intent)
+  steps:
+    - slot_was_set:
+        - appointment_status: canceled
+    - intent: cancel_appointment
+    - action: action_cancel_appointment
+    - action: utter_cancel_appointment
+    - intent: affirm
+    - action: appointment_form
+    - action: action_book_appointment
+
+- story: User cancels an appointment and ends flow (through intent)
+  steps:
+    - slot_was_set:
+        - appointment_status: canceled
+    - intent: cancel_appointment
+    - action: action_cancel_appointment
+    - action: utter_cancel_appointment
+    - intent: deny
+    - action: action_end_flow
 
 - story: Greet user and offer help (new)
   steps:
@@ -47,13 +94,12 @@ stories:
 - story: User asks a general question
   steps:
     - intent: faq
-    - action: utter_reschedule
+    - action: utter_greet
     # - action: action_chat_with_gpt
 
-- story: User wants to reschedule appointment
+- story: User wants to reschedule appointment (through button)
   steps:
     - intent: request_reschedule
-    #- intent: reschedule_appointment
     - action: utter_reschedule
     - action: reschedule_form
     - active_loop: reschedule_form
@@ -64,7 +110,30 @@ stories:
     - active_loop: null
     - action: action_reschedule_appointment
 
-- story: User wants to know current appointments
+- story: User wants to reschedule appointment (through intent)
+  steps:
+    - intent: reschedule_appointment
+    - action: utter_reschedule
+    - action: reschedule_form
+    - active_loop: reschedule_form
+    - slot_was_set:
+        - requested_slot: user_email
+    - slot_was_set:
+        - requested_slot: appointment_date
+    - active_loop: null
+    - action: action_reschedule_appointment
+
+- story: User wants to know current appointments (through button)
+  steps:
+    - intent: get_existing_appointments
+    - action: get_email_form
+    - active_loop: get_email_form
+    - slot_was_set:
+        - user_email
+    - active_loop: null
+    - action: action_get_appointments
+
+- story: User wants to know current appointments (through intent)
   steps:
     - intent: get_appointments
     - action: get_email_form
@@ -73,3 +142,14 @@ stories:
         - user_email
     - active_loop: null
     - action: action_get_appointments
+
+- story: User wants to know available appointment times
+  steps:
+    - intent: get_available_appointments
+    - action: action_get_available_appointments
+
+- story: User wants to know appointment pre-requisites
+  steps:
+    - intent: request_pre_requisites
+    - action: utter_prerequisites
+    

@@ -67,11 +67,11 @@ class GoogleHandler:
                 "description": description,
                 "start": {
                     "dateTime": start_datetime.isoformat(),
-                    "timeZone": "UTC"
+                    "timeZone": "Europe/Amsterdam"
                 },
                 "end": {
                     "dateTime": end_datetime.isoformat(),
-                    "timeZone": "UTC"
+                    "timeZone": "Europe/Amsterdam"
                 },
                 "attendees": [
                     {
@@ -157,11 +157,11 @@ class GoogleHandler:
             event = service.events().get(calendarId=calendar_id, eventId=event_id).execute()
             event["start"] = {
                 "dateTime": start_datetime.isoformat(),
-                "timeZone": "UTC"
+                "timeZone": "Europe/Amsterdam"
             }
             event["end"] = {
                 "dateTime": end_datetime.isoformat(),
-                "timeZone": "UTC"
+                "timeZone": "Europe/Amsterdam"
             }
 
             updated_appointment =  service.events().update(calendarId=calendar_id, eventId=event_id, body=event).execute()

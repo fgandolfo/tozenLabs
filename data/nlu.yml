@@ -5,6 +5,15 @@ nlu:
 # ------------------------------------
 # ----------- BUTTONS ----------------
 # ------------------------------------
+- intent: request_pre_requisites
+  examples: |
+    - What are the pre requisites for this appointment?
+    - What are the pre-requisites for this appointment?
+    - Are there any pre-requisites for the appointment?
+    - Are there pre-requisites?
+    - Is there something to know before the appointment?
+    - Is there something to know beforehand?
+
 - intent: request_reschedule
   examples: |
     - I want to reschedule my appointment
@@ -13,6 +22,10 @@ nlu:
     - Reschedule my meeting
     - I need to select a different time
     - Move my appointment
+    - I need to change my current appointment
+    - Move my existing booking to another time
+    - Can I reschedule my confirmed appointment?
+    - I can't make it at my scheduled time, can we change it?
 
 - intent: request_cancel
   examples: |
@@ -29,6 +42,21 @@ nlu:
     - I need a new appointment
     - Set up a new meeting
     - Book me an appointment
+
+- intent: get_existing_appointments
+  examples: |
+    - What are my current appointments?
+    - What appointments do I have?
+    - Show me my appointments
+    - Next appointments
+    - What are my bookings?
+    - What are my current appointments?
+    - What appointments do I have?
+    - Show me my upcoming bookings
+    - List all my scheduled meetings
+    - When is my next appointment?
+    - Do I have any booked meetings this week?
+    - Tell me about my upcoming schedule
 # ------------------------------------
 
 - intent: greet
@@ -123,6 +151,7 @@ nlu:
     - I need to see someone, what's available?
     - When is the next available slot?
     - Can you check the calendar for me?
+    - Book appointment
     - I want to reserve a slot.
     - Please confirm my booking request.
     - How do I make an official appointment?
@@ -318,6 +347,10 @@ nlu:
     - See you in a bit!
     - Thanks a lot, talk soon.
 
+- intent: get_available_appointments
+  examples: |
+    - What time can I book?
+
 - intent: faq
   examples: |
     - this is a test for gpt4
@@ -329,6 +362,7 @@ nlu:
     - I'd like to move my booking to a different day.
     - Is it possible to postpone my appointment?
     - I want to modify my appointment schedule.
+    - Reschedule appointment
     - Can you help me change my appointment time?
     - I need to rebook my appointment for a later date.
     - I won't be able to make it; can we reschedule?
@@ -340,6 +374,8 @@ nlu:
     - What are my current appointments?
     - What appointments do I have?
     - Show me my appointments
+    - Next appointments
+    - What are my bookings?
 
 - intent: select_option
   examples: |
@@ -349,55 +385,22 @@ nlu:
     - 4
     - 5
 
-# - intent: faq
-  # examples: |
-    # - How do I book an appointment?
-    # - What are your working hours?
-    # - Do you offer same-day appointments?
-    # - Can I reschedule my booking?
-    # - How much does an appointment cost?
-    # - Where are you located?
-    # - What payment methods do you accept?
-    # - Do I need to bring anything to my appointment?
-    # - How long does an appointment take?
-    # - What happens if I'm late?
-    # - Can I cancel my appointment?
-    # - How do I confirm my booking?
-    # - Do you offer online consultations?
-    # - Is there a cancellation fee?
-    # - How soon can I book an appointment?
-    # - Do you send reminders?
-    # - How can I contact support?
-    # - Do you have weekend availability?
-    # - Can I book for someone else?
-    # - Do you accept walk-ins?
-    # - What's your refund policy?
-    # - Is there a waiting list?
-    # - How do I access my appointment details?
-    # - Can I book multiple appointments?
-    # - What's the earliest available slot?
-    # - How do I change my email for notifications?
-    # - Do you offer emergency appointments?
-    # - What's the best way to reach customer support?
-    # - Can I book via WhatsApp?
-    # - Are your services covered by insurance?
-    # - Do you have a mobile app?
-    # - What languages do you support?
-    # - Can I get a receipt for my appointment?
-    # - How do I update my contact details?
-    # - Are there discounts available?
-    # - Can I book a recurring appointment?
-    # - Do I need to create an account to book?
-    # - How do I reset my password?
-    # - What's the latest I can cancel an appointment?
-    # - How do I check my appointment status?
-    # - Is there a confirmation email?
-    # - Do you provide virtual appointments?
-    # - Can I get a reminder before my appointment?
-    # - Do you support group bookings?
-    # - What should I do if I don't receive a confirmation?
-    # - Do I need to pay upfront?
-    # - What's your no-show policy?
-    # - Can I speak with a representative before booking?
-    # - How can I provide feedback on my experience?
-    # - Do you offer follow-up consultations?
+- intent: affirm
+  examples: |
+    - yes
+    - yeah
+    - sure
+    - of course
+    - absolutely
+    - definitely
+    - sounds good
+
+- intent: deny
+  examples: |
+    - no
+    - nah
+    - nope
+    - not really
+    - I don't think so
+    - no thanks
+    - I'd rather not

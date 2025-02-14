@@ -1,17 +1,27 @@
-from utils.constants import RASA_VALIDATION_REGEX_DATE, RASA_VALIDATION_REGEX_EMAIL, RASA_ACTION_BOOK_APPOINTMENT, RASA_ACTION_VALIDATE_FORM, RASA_ACTION_CHAT_W_GPT, RASA_ACTION_RESCHEDULE_APPOINTMENT, RASA_ACTION_GET_APPOINTMENTS, RASA_ACTION_CANCEL_APPOINTMENT, RASA_ACTION_CHECK_EXISTING_APPOINTMENTS, RASA_ACTION_PROCESS_OPTION, DB_STATUS_SCHEDULED, DB_STATUS_DONE, DB_STATUS_CANCELED
+from utils.constants import *
+from rasa_sdk.events import SlotSet, FollowupAction, UserUtteranceReverted
 from infrastructure.database.database import Database
 from reponse_handler.handler import ResponseHandler
-from rasa_sdk.events import SlotSet, FollowupAction
 from rasa_sdk.executor import CollectingDispatcher
 from utils.exceptions import AuthenticationFailed
 from booking_handler.handler import GoogleHandler
 from rasa_sdk.forms import FormValidationAction
 from utils.utils import format_appointment_date
 from rasa_sdk import Action, Tracker
-from typing import Dict, Text, Any
+from typing import Dict, Text, Any, List
 from utils.logger import logger
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
+
+# ------------------------------------
+# --------- WORKING HOURS & ----------
+# --------   SLOT DURATION -----------
+# ------------------------------------
+WORK_HOURS_START = 9  # Opening
+WORK_HOURS_END = 18  # Closing
+SLOT_DURATION = timedelta(minutes=30)  # X-minute slots
+DAYS_AHEAD = 7  # Check availability for the next X days
+# ------------------------------------
 
 # ------------------------------------
 # ----------- HANDLERS ---------------
@@ -25,32 +35,45 @@ db = Database()
 # ---------------------------------------
 class ValidateAppointmentForm(FormValidationAction):
     def name(self) -> str:
+        self.ai_assistant = ResponseHandler()
         return RASA_ACTION_VALIDATE_FORM
 
     def validate_user_name(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
-        if slot_value and len(slot_value) < 2:
+        if not slot_value:
+            return {"appointment_date": None}
+        
+        curated_value = self.ai_assistant.validate_user_input(slot_value, "name")
+
+        if len(curated_value) < 2:
             dispatcher.utter_message(text="Name must be at least 2 characters long.")
             return { "user_name": None }
         
-        return { "user_name": slot_value }
+        return { "user_name": curated_value }
 
     def validate_user_email(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
-        if slot_value and not re.match(RASA_VALIDATION_REGEX_EMAIL, slot_value):
+        if not slot_value:
+            return {"appointment_date": None}
+        
+        curated_value = self.ai_assistant.validate_user_input(slot_value, "email")
+
+        if not re.match(RASA_VALIDATION_REGEX_EMAIL, curated_value):
             dispatcher.utter_message(text="Invalid email format. Please enter a valid email.")
             return { "user_email": None }
         
-        return { "user_email": slot_value }
+        return { "user_email": curated_value }
 
     def validate_appointment_date(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
         if not slot_value:
             return {"appointment_date": None}
         
-        if not re.match(RASA_VALIDATION_REGEX_DATE, slot_value):
+        curated_value = self.ai_assistant.validate_user_input(slot_value, "date")
+
+        if not re.match(RASA_VALIDATION_REGEX_DATE, curated_value):
             dispatcher.utter_message(text="Invalid date format! Please use YYYY-MM-DD HH:MM (e.g., 2025-02-10 14:30).")
             return {"appointment_date": None}
         
         try:
-            date_obj = datetime.strptime(slot_value, "%Y-%m-%d %H:%M")
+            date_obj = datetime.strptime(curated_value, "%Y-%m-%d %H:%M")
             if date_obj < datetime.now():
                 dispatcher.utter_message(text="Please select a future date and time.")
                 return {"appointment_date": None}
@@ -58,7 +81,63 @@ class ValidateAppointmentForm(FormValidationAction):
             dispatcher.utter_message(text="Invalid date. Please provide a valid date and time.")
             return {"appointment_date": None}
         
-        return {"appointment_date": slot_value}
+        return {"appointment_date": curated_value}
+
+class ValidateEmailForm(FormValidationAction):
+    def name(self) -> str:
+        self.ai_assistant = ResponseHandler()
+        return RASA_ACTION_VALIDATE_EMAIL
+
+    def validate_user_email(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
+        if not slot_value:
+            return {"appointment_date": None}
+        
+        curated_value = self.ai_assistant.validate_user_input(slot_value, "email")
+
+        if not re.match(RASA_VALIDATION_REGEX_EMAIL, curated_value):
+            dispatcher.utter_message(text="Invalid email format. Please enter a valid email.")
+            return { "user_email": None }
+        
+        return { "user_email": curated_value }
+
+class ValidateRescheduleForm(FormValidationAction):
+    def name(self) -> str:
+        self.ai_assistant = ResponseHandler()
+        return RASA_ACTION_VALIDATE_RESCHEDULE
+
+    def validate_user_email(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
+        if not slot_value:
+            return {"appointment_date": None}
+        
+        curated_value = self.ai_assistant.validate_user_input(slot_value, "email")
+
+        if not re.match(RASA_VALIDATION_REGEX_EMAIL, curated_value):
+            dispatcher.utter_message(text="Invalid email format. Please enter a valid email.")
+            return { "user_email": None }
+        
+        return { "user_email": curated_value }
+
+    def validate_appointment_date(self, slot_value: str, dispatcher: CollectingDispatcher, tracker: Tracker, domain: dict) -> dict:
+        if not slot_value:
+            return {"appointment_date": None}
+        
+        curated_value = self.ai_assistant.validate_user_input(slot_value, "date")
+
+        if not re.match(RASA_VALIDATION_REGEX_DATE, curated_value):
+            dispatcher.utter_message(text="Invalid date format! Please use YYYY-MM-DD HH:MM (e.g., 2025-02-10 14:30).")
+            return {"appointment_date": None}
+        
+        try:
+            date_obj = datetime.strptime(curated_value, "%Y-%m-%d %H:%M")
+            if date_obj < datetime.now():
+                dispatcher.utter_message(text="Please select a future date and time.")
+                return {"appointment_date": None}
+        except ValueError:
+            dispatcher.utter_message(text="Invalid date. Please provide a valid date and time.")
+            return {"appointment_date": None}
+        
+        return {"appointment_date": curated_value}
+    
 # ---------------------------------------
 
 # -----------------------------------
@@ -161,7 +240,8 @@ class ActionBookAppointment(Action):
             return [
                 SlotSet("appointment_date", None),
                 SlotSet("requested_slot", None),
-                SlotSet("appointment_status", "pending_action")
+                SlotSet("appointment_status", "pending_action"),
+                FollowupAction("action_end_flow")
             ]
 
         except Exception as e:
@@ -296,7 +376,6 @@ class ActionCancelAppointment(Action):
                 SlotSet("appointment_status", "pending_action")
             ]
 
-        dispatcher.utter_message(text="📅 Your appointment has been canceled!")
         return [
             SlotSet("requested_slot", None),
             SlotSet("appointment_status", "pending_action")
@@ -311,14 +390,15 @@ class ActionChatWithGPT(Action):
                    potentially a followup action to start the appointment form
     """
     def name(self) -> str:
+        self.ai_assistant = ResponseHandler()
         return RASA_ACTION_CHAT_W_GPT
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
 
         user_message = tracker.latest_message.get("text")
         logger.info(tracker.latest_message)
-
-        response = ResponseHandler().generate_response(
+        
+        response = self.ai_assistant.generate_response(
             user_message
         )
 
@@ -359,9 +439,20 @@ class ActionGetAppointments(Action):
         for date in mapped_dates:
             formatted_date = format_appointment_date(date)
             response_message += f"🔹 {formatted_date}\n"
-
+        
         logger.info(f"Retrieved all appointments for {user_email}")
+
         dispatcher.utter_message(text=response_message)
+
+        dispatcher.utter_message(
+            text="What would you like to do?",
+            buttons=[
+                {"title": "📅 Reschedule", "payload": "/request_reschedule"},
+                {"title": "❌ Cancel", "payload": "/request_cancel"},
+                {"title": "➕ Book New", "payload": "/request_booking"}
+            ]
+        )
+
         return [
             SlotSet("requested_slot", None),
             SlotSet("appointment_status", "pending_action")
@@ -397,4 +488,151 @@ class ActionProcessOption(Action):
             dispatcher.utter_message(text="I didn't understand that. Please enter any of the 3 options.")
             return []
 
+class ActionGetAvailableAppointments(Action):
+    def name(self) -> str:
+        return "action_get_available_appointments"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict) -> List[Dict]:
+        user_email = tracker.get_slot("user_email")
+
+        # Fetch existing appointments from the database
+        existing_appointments = list(
+            filter(
+                lambda x: x["status"].upper() == DB_STATUS_SCHEDULED,
+                db.display_appointments_by_email(user_email)
+            )
+        )
+        
+        # Convert existing appointments to a dictionary for quick lookup
+        booked_slots = self.process_booked_slots(existing_appointments)
+
+        # Generate available slots
+        available_slots = self.get_available_slots(booked_slots)
+
+        if available_slots:
+            message = "Here are the available appointment slots:\n"
+            for day, times in available_slots.items():
+                formatted_times = ", ".join(times)
+                message += f"📅 {day}: {formatted_times}\n"
+        else:
+            message = "No available slots found in the next 7 days. 😞"
+
+        dispatcher.utter_message(text=message)
+        return []
+    
+    def process_booked_slots(self, appointments) -> Dict[str, List[str]]:
+        """
+        Process the booked slots and return a dictionary {date: [booked_times]}.
+        Filters out past appointments.
+        """
+        booked_slots = {}
+
+        now = datetime.now()
+
+        for appt in appointments:
+            date_str = datetime.strptime(appt["date"], "%Y-%m-%d %H:%M").strftime("%Y-%m-%d")
+            time_str = datetime.strptime(appt["date"], "%Y-%m-%d %H:%M").strftime("%H:%M")
+
+            # Convert appointment date and time to a datetime object
+            appt_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+
+            # Ignore past appointments
+            if appt_datetime < now:
+                continue
+
+            if date_str not in booked_slots:
+                booked_slots[date_str] = []
+
+            booked_slots[date_str].append(time_str)
+
+        return booked_slots
+    
+    def get_available_slots(self, booked_slots: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        """
+        Generates all possible slots for the next 7 days and filters out the booked ones.
+        Returns available slots as a dictionary {date: [available_times]}.
+        """
+        today = datetime.today()
+        available_slots = {}
+
+        for day_offset in range(DAYS_AHEAD):
+            current_day = today + timedelta(days=day_offset)
+
+            # Skip weekends
+            if current_day.weekday() >= 5:
+                continue
+
+            date_str = current_day.strftime("%Y-%m-%d")
+            available_slots[date_str] = []
+
+            start_time = datetime(current_day.year, current_day.month, current_day.day, WORK_HOURS_START, 0)
+            end_time = datetime(current_day.year, current_day.month, current_day.day, WORK_HOURS_END, 0)
+
+            current_time = start_time
+            while current_time < end_time:
+                time_str = current_time.strftime("%H:%M")
+
+                # Ensure slots are in future
+                if current_time > datetime.now():
+
+                    # Check if the slot is available (does not overlap with booked slots)
+                    if date_str not in booked_slots or not self.is_overlapping(time_str, booked_slots[date_str]):
+                        available_slots[date_str].append(time_str)
+
+                current_time += SLOT_DURATION  # Move to the next 30-minute slot
+
+            if not available_slots[date_str]:
+                del available_slots[date_str]  # Remove empty days
+
+        return available_slots
+
+    def is_overlapping(self, slot: str, booked_times: List[str]) -> bool:
+        """
+        Checks if a given time slot overlaps with any existing booked slots.
+        Ensures a 30-minute gap after any booking.
+        """
+        slot_time = datetime.strptime(slot, "%H:%M")
+
+        for booked_time in booked_times:
+            booked_time_dt = datetime.strptime(booked_time, "%H:%M")
+
+            # If the slot is within 30 minutes after an existing booking, it is not available
+            #   14:00   14:30   15:00
+            if booked_time_dt - (SLOT_DURATION*0.75) <= slot_time < booked_time_dt + SLOT_DURATION:
+                logger.info(f"Booked_time: {booked_time_dt}")
+                logger.info(f"Checking slot: {slot_time}")
+                logger.info(f"End booked_time: {booked_time_dt + SLOT_DURATION}\n")
+                return True
+
+        return False
+
+class ActionEndFlow(Action):
+    """
+    This action checks if a user has any existing appointments and provides options
+    to manage them. If appointments exist, it displays them and offers options to:
+    1. Reschedule
+    2. Cancel
+    3. Book a new appointment
+
+    If no appointments exist, it starts the appointment booking flow.
+
+    Returns:
+        List[Dict]: A list containing slot updates for appointment_status and
+                   potentially a followup action to start the appointment form
+    """
+    def name(self) -> str:
+        return "action_end_flow"
+
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain):
+
+        dispatcher.utter_message(
+            text="Thank you for using our AI asistant for managing your appointments.\nI'll leave some useful links below 👇🏼\n",
+            buttons=[
+                {"title": "📅 See my appointment details", "payload": "/get_existing_appointments"},
+                {"title": "🌐 Visit website", "url": "https://www.example.com", "type": "web_url"},
+                {"title": "ℹ️ Appointment pre-requisites", "payload": "/request_pre_requisites"}
+            ]
+        )
+    
+        return [SlotSet("appointment_status", None)]
 # -----------------------------------
