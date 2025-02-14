@@ -223,6 +223,7 @@ class ActionBookAppointment(Action):
             appointment_title = f"{business_name} - {business_service} appointment with {business_assignee}"
             appointment_description = "This is a test for a booking AI agent"
 
+
             event_id = booking_handler.book_appointment(
                 appointment_date,
                 user_email,
