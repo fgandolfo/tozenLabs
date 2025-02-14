@@ -1,0 +1,72 @@
+# Ignore Python-related cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environment
+venv/
+.env/
+.venv/
+env/
+*.db
+
+# Ignore environment variable files
+*.env
+*.venv
+*.secrets
+*.config
+*.ini
+
+# Ignore log files
+*.log
+logs/
+debug.log
+nohup.out
+
+# Ignore secrets and credentials
+token.pickle
+credentials.json
+config.json
+*.pem
+*.key
+*.crt
+*.p12
+*.cer
+*.der
+auth_token.txt
+secret.txt
+google_credentials.json
+service_account.json
+client_secret.json
+local_settings.py
+
+# Ignore Rasa and Machine Learning models
+models/
+*.tar.gz
+*.pkl
+*.h5
+*.onnx
+*.ckpt
+cache/
+data/
+database/
+.rasa
+*.db
+
+# Ignore Node.js dependencies (if using JavaScript)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Ignore IDE/editor specific files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Ignore MacOS and system files
+.DS_Store
+Thumbs.db
+
+# Ignore Git-related files
+.gitconfig
