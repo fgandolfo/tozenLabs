@@ -1,18 +1,36 @@
 version: "3.1"
 
 intents:
+  - get_available_appointments
+  - get_existing_appointments
+  - request_pre_requisites
   - reschedule_appointment
   - confirm_appointment
   - cancel_appointment
+  - request_reschedule
   - book_appointment
   - get_appointments
+  - request_booking
+  - request_cancel
   - select_option
   - select_date
   - goodbye
+  - affirm
   - greet
+  - deny
   - faq
 
 slots:
+  user_confirmation:
+    type: text
+    mappings:
+      - type: from_intent
+        intent: affirm
+        value: "yes"
+      - type: from_intent
+        intent: deny
+        value: "no"
+
   appointment_status:
     type: text
     mappings:
@@ -65,35 +83,62 @@ forms:
 
 actions:
   - action_check_existing_appointments
+  - action_get_available_appointments
   - action_reschedule_appointment
   - action_cancel_appointment
   - validate_appointment_form
+  - validate_reschedule_form
   - action_get_appointments
   - action_book_appointment
   - action_process_option
   - action_chat_with_gpt
+  - validate_email_form
+  - action_end_flow
   
 responses:
+  utter_ask_manage_appointment:
+    - text: "What would you like to do?"
+      buttons:
+        - title: "📅 Reschedule"
+          payload: "/request_reschedule"
+        - title: "❌ Cancel"
+          payload: "/request_cancel"
+        - title: "🆕 Book a new appointment"
+          payload: "/request_booking"
+
   utter_greet:
-    - text: "Hello! How can I assist you today? 😊"
-    - text: "Hi there! What can I help you today?"
+    - text: "Welcome to the our AI booking agent! How can I assist you today? 😊"
+      buttons:
+        - title: "🆕 Book an appointment"
+          payload: "/request_booking"
+        - title: "📅 Check my appointments"
+          payload: "/get_existing_appointments"
+        - title: "🔍 Get available appointments"
+          payload: "/action_get_available_appointments"
 
   utter_ask_user_name:
-    - text: "Can you provide your full name?"
+    - text: "Please write down your full name ✍🏼"
   
   utter_ask_user_email:
-    - text: "Please provide your email"
+    - text: "Please provide your email 📩"
   
   utter_ask_appointment_date:
-    - text: "Please provide an appointment date"
+    - text: "Please provide an appointment date 😄"
 
   utter_confirm_appointment:
-    - text: "Great! Your appointment is booked for {appointment_date}. 🎉"
-    - text: "Your appointment on {appointment_date} is confirmed! See you then!"
+    - text: "Great! Your appointment is booked for {appointment_date}. 🎉 You should have an Google Calendar invite sent to your email."
+    - text: "Your appointment on {appointment_date} is confirmed! You should have an Google Calendar invite sent to your email. 🎉"
 
   utter_cancel_appointment:
-    - text: "Your appointment has been canceled. Let me know if you want to reschedule!"
-    - text: "No problem! I have canceled your booking. Let me know if you need another date."
+    - text: "Your appointment has been canceled. Do you need to book a new one?"
+      buttons:
+        - title: "🆕 Book a new appointment"
+          payload: "/request_booking"
+    
+    - text: "No problem! I have canceled your booking. Would you want to book a new one?"
+      buttons:
+        - title: "🆕 Book a new appointment"
+          payload: "/request_booking"
 
   utter_goodbye:
     - text: "Thanks for reaching out! Have a great day! 😊"
@@ -101,8 +146,13 @@ responses:
     - text: "Tot snel! 😊"
   
   utter_reschedule:
-    - text: "Sure no problem! Please provide a new appointment date."
-
+    - text: "Sure no problem! We can take care of that.\n"
+  
+  utter_prerequisites:
+    - text: "There are no pre-requisites for this appointment 😊"
+  
+  utter_default:
+    - text: "Sorry but I didn't understand what you meant 😅. Can you rephrase please?"
 
 session_config:
   session_expiration_time: 60
