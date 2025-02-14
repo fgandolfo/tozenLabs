@@ -214,13 +214,21 @@ class ActionBookAppointment(Action):
             if not all([user_email, user_name, appointment_date]):
                 dispatcher.utter_message(text="Missing required information. Please provide email and appointment date.")
                 return []
-            
+
+            business_name = "TheBarberShop"
+            business_service = "Standard Haircut"
+            business_email = "tozenlabs@gmail.com"
+            business_assignee = "John Doe"
+            business_address = "Evergreen 123, Springfield"
+            appointment_title = f"{business_name} - {business_service} appointment with {business_assignee}"
+            appointment_description = "This is a test for a booking AI agent"
+
             event_id = booking_handler.book_appointment(
                 appointment_date,
                 user_email,
-                "tozenlabs@gmail.com", #client's email
-                "Testing new module", #description
-                "Module tester" #title
+                business_email, #client's email
+                appointment_description, #description
+                appointment_title #title
             )
 
             db.insert_appointment(
