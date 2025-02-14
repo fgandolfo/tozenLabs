@@ -215,6 +215,9 @@ class ActionBookAppointment(Action):
                 dispatcher.utter_message(text="Missing required information. Please provide email and appointment date.")
                 return []
 
+            # BUSINESS_ID = os.getenv("BUSINESS_ID")
+            # db.get_business_details(BUSINESS_ID)
+
             business_name = "TheBarberShop"
             business_service = "Standard Haircut"
             business_email = "tozenlabs@gmail.com"
@@ -222,7 +225,6 @@ class ActionBookAppointment(Action):
             business_address = "Evergreen 123, Springfield"
             appointment_title = f"{business_name} - {business_service} appointment with {business_assignee}"
             appointment_description = "This is a test for a booking AI agent"
-
 
             event_id = booking_handler.book_appointment(
                 appointment_date,
@@ -242,7 +244,8 @@ class ActionBookAppointment(Action):
             logger.info(f"Appointment booked {user_email}, {user_name}, {appointment_date}")
 
             if event_id:
-                dispatcher.utter_message(text=f"Your appointment for {appointment_date} is scheduled! 📅 Invitation sent to {user_email}.")
+                dispatcher.utter_message(
+                    text=f"Your appointment for {appointment_date} has been scheduled! 🚀\nBooking details:\n\t- Booking: {appointment_title}\n\t- Barber: {business_assignee}\n\t- Address: {business_address}")
             else:
                 dispatcher.utter_message(text="There was an issue scheduling your appointment. Please try again later.")
 
@@ -321,7 +324,7 @@ class ActionRescheduleAppointment(Action):
             ]
 
         logger.info(f"Appointment rescheduled. {user_email}, {appointment_date}")
-        dispatcher.utter_message(text=f"Your appointment has been rescheduled! 📅 Updated invitation sent to {user_email}.")
+        dispatcher.utter_message(text=f"Your appointment has been rescheduled! 📅\nUpdated invitation sent to {user_email}\n\t- New appointment date: {appointment_date}")
         return [
             SlotSet("appointment_date", None),
             SlotSet("requested_slot", None),
