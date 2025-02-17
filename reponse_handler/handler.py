@@ -72,6 +72,8 @@ class ResponseHandler:
 
         self.role_user["content"] = user_input
 
+        logger.info(self.role_user)
+
         generated_response = self.client.chat.completions.create(
             model=self.model,
             messages=[

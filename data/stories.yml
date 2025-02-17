@@ -152,4 +152,8 @@ stories:
   steps:
     - intent: request_pre_requisites
     - action: utter_prerequisites
-    
+  
+- story: User is testing
+  steps:
+    - intent: user_tests
+    - action: action_test_func

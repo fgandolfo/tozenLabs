@@ -57,6 +57,19 @@ nlu:
     - When is my next appointment?
     - Do I have any booked meetings this week?
     - Tell me about my upcoming schedule
+
+- intent: get_available_appointments
+  examples: |
+    - What time slots are available for booking?
+    - Can you show me the available appointment times?
+    - When can I schedule an appointment?
+    - What are the free slots for booking?
+    - Show me the open appointment times.
+    - When is the next available appointment?
+    - What days and times can I book an appointment?
+    - Do you have any openings this week?
+    - When is the earliest I can book?
+    - I want to see the available appointment slots.
 # ------------------------------------
 
 - intent: greet
@@ -117,44 +130,27 @@ nlu:
     - I need to book an appointment
     - Can I book a time with you?
     - I want an appointment
-    - Do you have available times?
-    - When can I come in?
     - I want to make a reservation
-    - How do I book an appointment?
     - I'd like to book a time slot.
     - Can I set up a meeting?
     - I need a booking.
-    - When is the earliest I can book?
     - Can you arrange a meeting for me?
-    - Can I book a slot for tomorrow?
-    - I want to see a specialist, when can I come?
-    - How do I reserve an appointment?
     - I'd like to fix an appointment.
     - I want to lock in a time.
     - Can you set up a time for me?
-    - How soon can I get an appointment?
     - Please book me in for a visit.
-    - When can I come by?
     - I need to see someone, how do I book?
-    - Do you have any slots available today?
     - How do I arrange a booking?
     - Can I secure a time slot?
     - Book me for an appointment.
     - I'd like to request a time.
     - Can I arrange an appointment?
-    - What's the process to book a meeting?
-    - How do I confirm an appointment?
     - Please book a session for me.
-    - Can you check availability for me?
     - I'd like to sign up for an appointment.
     - Book a visit for me, please.
-    - I need to see someone, what's available?
-    - When is the next available slot?
-    - Can you check the calendar for me?
     - Book appointment
     - I want to reserve a slot.
     - Please confirm my booking request.
-    - How do I make an official appointment?
 
 - intent: select_date
   examples: |
@@ -347,10 +343,6 @@ nlu:
     - See you in a bit!
     - Thanks a lot, talk soon.
 
-- intent: get_available_appointments
-  examples: |
-    - What time can I book?
-
 - intent: faq
   examples: |
     - this is a test for gpt4
@@ -404,3 +396,7 @@ nlu:
     - I don't think so
     - no thanks
     - I'd rather not
+
+- intent: user_tests
+  examples: |
+    - Welcome123 this is a test.

@@ -16,6 +16,7 @@ intents:
   - select_date
   - goodbye
   - affirm
+  - user_tests
   - greet
   - deny
   - faq
@@ -83,15 +84,16 @@ forms:
 
 actions:
   - action_check_existing_appointments
-  - action_get_available_appointments
   - action_reschedule_appointment
   - action_cancel_appointment
   - validate_appointment_form
   - validate_reschedule_form
   - action_get_appointments
+  - action_get_available_appointments
   - action_book_appointment
   - action_process_option
   - action_chat_with_gpt
+  - action_test_func
   - validate_email_form
   - action_end_flow
   
@@ -114,7 +116,7 @@ responses:
         - title: "📅 Check my appointments"
           payload: "/get_existing_appointments"
         - title: "🔍 Get available appointments"
-          payload: "/action_get_available_appointments"
+          payload: "/get_available_appointments"
 
   utter_ask_user_name:
     - text: "Please write down your full name ✍🏼"
