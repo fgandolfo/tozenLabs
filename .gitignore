@@ -70,3 +70,16 @@ Thumbs.db
 
 # Ignore Git-related files
 .gitconfig
+
+# Ignore all cache and compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore database cache
+.rasa/
+.rasa/cache/
+*.db
+
+# Ignore logs and temp files
+*.log
